@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+playwright
+httpx
+tldextract
+openai
+pydantic>=2
+dnslib
+dnstwist
+confusable_homoglyphs
+dnspython

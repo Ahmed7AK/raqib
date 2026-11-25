@@ -1,0 +1,32 @@
+{
+  "_note": "Person C: verify EVERY official domain by visiting it before the demo, then set verified=true. keywords = strings that, if found in a domain that is NOT official, suggest impersonation. Keywords shorter than 5 chars only match as a whole token (e.g. rta-fines.com).",
+  "brands": [
+    {"name": "Abu Dhabi Police", "aliases": ["ADPolice", "AD Police", "شرطة أبوظبي"], "official_domains": ["adpolice.gov.ae"], "keywords": ["adpolice", "adpolic"], "verified": false},
+    {"name": "Dubai Police", "aliases": ["شرطة دبي"], "official_domains": ["dubaipolice.gov.ae"], "keywords": ["dubaipolice", "dxbpolice"], "verified": false},
+    {"name": "Ministry of Interior", "aliases": ["MOI UAE", "وزارة الداخلية"], "official_domains": ["moi.gov.ae"], "keywords": ["moi", "moiuae"], "verified": false},
+    {"name": "TDRA", "aliases": ["Telecommunications and Digital Government Regulatory Authority", "هيئة تنظيم الاتصالات"], "official_domains": ["tdra.gov.ae"], "keywords": ["tdra"], "verified": false},
+    {"name": "ICP", "aliases": ["Federal Authority for Identity, Citizenship, Customs and Port Security", "الهيئة الاتحادية للهوية والجنسية"], "official_domains": ["icp.gov.ae"], "keywords": ["icp", "uaeicp"], "verified": false},
+    {"name": "Abu Dhabi Customs", "aliases": ["جمارك أبوظبي"], "official_domains": ["adcustoms.gov.ae"], "keywords": ["adcustoms"], "verified": false},
+    {"name": "TAMM", "aliases": ["تم"], "official_domains": ["tamm.abudhabi"], "keywords": ["tamm"], "verified": false},
+    {"name": "UAE PASS", "aliases": ["UAEPASS", "الهوية الرقمية"], "official_domains": ["uaepass.ae"], "keywords": ["uaepass"], "verified": false},
+    {"name": "Salik", "aliases": ["سالك"], "official_domains": ["salik.ae"], "keywords": ["salik"], "verified": false},
+    {"name": "RTA", "aliases": ["Roads and Transport Authority", "هيئة الطرق والمواصلات"], "official_domains": ["rta.ae"], "keywords": ["rta"], "verified": false},
+    {"name": "Emirates Post", "aliases": ["بريد الإمارات"], "official_domains": ["emiratespost.ae"], "keywords": ["emiratespost", "empost"], "verified": false},
+    {"name": "Aramex", "aliases": ["أرامكس"], "official_domains": ["aramex.com"], "keywords": ["aramex"], "verified": false},
+    {"name": "DEWA", "aliases": ["Dubai Electricity and Water Authority", "هيئة كهرباء ومياه دبي"], "official_domains": ["dewa.gov.ae"], "keywords": ["dewa"], "verified": false},
+    {"name": "ADDC", "aliases": ["Abu Dhabi Distribution Company"], "official_domains": ["addc.ae"], "keywords": ["addc"], "verified": false},
+    {"name": "e& (Etisalat)", "aliases": ["Etisalat", "etisalat by e&", "اتصالات"], "official_domains": ["etisalat.ae", "eand.com"], "keywords": ["etisalat", "etislat"], "verified": false},
+    {"name": "du", "aliases": ["دو"], "official_domains": ["du.ae"], "keywords": [], "verified": false},
+    {"name": "ADCB", "aliases": ["Abu Dhabi Commercial Bank", "بنك أبوظبي التجاري"], "official_domains": ["adcb.com"], "keywords": ["adcb"], "verified": false},
+    {"name": "First Abu Dhabi Bank", "aliases": ["FAB", "بنك أبوظبي الأول"], "official_domains": ["bankfab.com"], "keywords": ["bankfab"], "verified": false},
+    {"name": "Emirates NBD", "aliases": ["ENBD", "الإمارات دبي الوطني"], "official_domains": ["emiratesnbd.com"], "keywords": ["emiratesnbd", "enbd"], "verified": false},
+    {"name": "Mashreq", "aliases": ["المشرق"], "official_domains": ["mashreq.com"], "keywords": ["mashreq"], "verified": false},
+    {"name": "ADNOC", "aliases": ["أدنوك"], "official_domains": ["adnoc.ae"], "keywords": ["adnoc"], "verified": false},
+    {"name": "Noon", "aliases": [], "official_domains": ["noon.com"], "keywords": ["noon"], "verified": false},
+    {"name": "Talabat", "aliases": [], "official_domains": ["talabat.com"], "keywords": ["talabat"], "verified": false},
+    {"name": "Careem", "aliases": [], "official_domains": ["careem.com"], "keywords": ["careem"], "verified": false},
+    {"name": "Emirates (airline)", "aliases": ["Emirates Airline", "طيران الإمارات"], "official_domains": ["emirates.com"], "keywords": ["flyemirates", "emiratesair"], "verified": false},
+    {"name": "Etihad Airways", "aliases": ["Etihad", "الاتحاد للطيران"], "official_domains": ["etihad.com"], "keywords": ["etihad"], "verified": false},
+    {"name": "UAE Government (generic)", "aliases": ["UAE Government", "حكومة الإمارات", "Consumer Protection", "حماية المستهلك"], "official_domains": [], "official_suffixes": [".gov.ae"], "keywords": ["govae", "uaegov"], "verified": false}
+  ]
+}

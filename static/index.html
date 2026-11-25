@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raqib — UAE scam-site analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#212227;--panel:#2a2b31;--line:#3a3c44;--ice:#BDD4E7;--blue:#8693AB;--steel:#637074;--txt:#e7eef5;
+        --clean:#7fb89a;--warn:#d9c36a;--caution:#e0975a;--restricted:#d9705f;--blocked:#e0525a}
+  *{box-sizing:border-box} body{margin:0;font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--txt)}
+  .mono{font-family:'Azeret Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  header{padding:18px 28px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+  header h1{margin:4px 0 0;font-size:24px;font-weight:500;color:var(--ice)}
+  main{max-width:1180px;margin:auto;padding:24px 28px}
+  form{display:flex;gap:10px}
+  input{flex:1;padding:13px 14px;border-radius:6px;border:1px solid var(--line);background:#1a1b1f;color:var(--txt);font:15px 'Space Grotesk'}
+  button{padding:12px 18px;border:0;border-radius:6px;background:var(--steel);color:#fff;font:500 14px 'Space Grotesk';cursor:pointer}
+  button:disabled{opacity:.5}
+  .hint{margin:8px 0 22px} .hint a{color:var(--ice)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:250px 1fr;gap:22px}
+  .grid img{width:100%;border-radius:6px;border:1px solid var(--line)}
+  .badge{display:inline-block;padding:4px 10px;border-radius:4px;font:500 12px 'Azeret Mono';letter-spacing:.06em}
+  .CLEAN,.ALLOW{background:#7fb89a22;color:var(--clean)} .WARN{background:#d9c36a22;color:var(--warn)}
+  .CAUTION{background:#e0975a22;color:var(--caution)} .RESTRICTED{background:#d9705f22;color:var(--restricted)}
+  .BLOCKED,.BLOCK{background:#e0525a26;color:var(--blocked)} .UNREACHABLE,.REVIEW{background:#63707433;color:var(--blue)}
+  .meter{display:flex;gap:4px;margin:12px 0 4px} .meter div{flex:1;height:6px;border-radius:2px;background:var(--line)}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:7px 14px;font-size:14px;margin:10px 0}
+  .kv>div:nth-child(odd){font:11px 'Azeret Mono';letter-spacing:.06em;text-transform:uppercase;color:var(--blue);padding-top:2px}
+  .flag{border-left:3px solid var(--steel);padding:8px 12px;margin:8px 0;background:#1f2025;border-radius:0 6px 6px 0}
+  .flag.crit{border-color:var(--blocked)} .flag b{font-weight:500} .flag .ev{color:var(--blue);font-size:13px;margin-top:3px}
+  .flag .id{font:11px 'Azeret Mono';color:var(--steel);margin-right:6px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  table{width:100%;border-collapse:collapse;font-size:14px} td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+  th{font:11px 'Azeret Mono';letter-spacing:.06em;text-transform:uppercase;color:var(--blue);font-weight:400}
+  #rows tr{cursor:pointer} #rows tr:hover td{background:#30323a}
+  a{color:var(--ice)} .note{background:#1a1b1f;border-left:3px solid var(--steel);padding:10px 12px;border-radius:0 6px 6px 0;font-size:14px;margin-top:10px}
+  h3{font-weight:500;color:var(--ice);margin:0 0 10px} .muted{color:var(--blue)}
+  @media(max-width:800px){.grid,.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div><div class="mono">Raqib / رقيب / scam-site analyst</div><h1>Every link checked before it can hurt you.</h1></div>
+<div class="mono">AI reads · code decides · network enforces</div></header>
+<main>
+  <form id="f"><input id="u" placeholder="Paste a suspicious link or domain" autocomplete="off"><button id="b">Analyse</button></form>
+  <div class="hint mono">Try the training sample: <a href="#" id="demo">/demo/fine</a> — hidden text tells AI scanners it is safe</div>
+  <div id="out"></div>
+  <div class="cols">
+    <div class="card"><h3>Recent analyses</h3><table><thead><tr><th>Tier</th><th>Domain</th><th>Flags</th><th>Source</th><th>When</th></tr></thead><tbody id="rows"></tbody></table></div>
+    <div class="card"><h3>Live network decisions</h3><table><thead><tr><th>Action</th><th>Domain</th><th>Device</th><th>Why</th></tr></thead><tbody id="events"></tbody></table>
+      <h3 style="margin-top:18px">Review requests</h3><table><tbody id="reviews"></tbody></table></div>
+  </div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const d10 = s => s ? String(s).slice(0,10) : '—';
+const TIERS = ['CLEAN','WARN','CAUTION','RESTRICTED','BLOCKED'];
+const TIER_TXT = {CLEAN:'Opens normally', WARN:'Opens with a warning; user can trust it', CAUTION:'Held; user can open once or trust it',
+  RESTRICTED:'Blocked; only a guardian or analyst review can release it', BLOCKED:'Blocked for everyone; evidence sent to police', UNREACHABLE:'Page could not be loaded'};
+function meter(t){ const i = TIERS.indexOf(t); const col = ['clean','warn','caution','restricted','blocked'];
+  return `<div class="meter">${TIERS.map((x,k)=>`<div style="${k<=i?`background:var(--${col[i]})`:''}"></div>`).join('')}</div>`; }
+function intelPanel(I){
+  if(!I) return '';
+  const w = I.who||{}, h = I.where||{}, hi = I.history||{}, dns = I.dns||{};
+  const reg = typeof w.registrant === 'string' ? w.registrant : [w.registrant?.org, w.registrant?.name, w.registrant?.country].filter(Boolean).join(', ') || '—';
+  return `<div class="card"><h3>Site intelligence — who, when, where</h3><div class="cols"><div class="kv">
+    <div>Created</div><div>${d10(w.created)}${w.age_days!=null?` · ${w.age_days} days ago`:''}</div>
+    <div>Registrar</div><div>${esc(w.registrar||'—')}</div>
+    <div>Owner</div><div>${esc(reg)}</div>
+    <div>Expires</div><div>${d10(w.expires)}</div>
+    <div>Name servers</div><div>${esc((w.nameservers||[]).join(', ')||'—')}</div>
+    <div>First on the web</div><div>${hi.archived===false?'never archived':d10(hi.first_archived)}</div>
+    <div>First certificate</div><div>${d10(hi.first_certificate)}${hi.certificates?` · ${hi.certificates} certs`:''}</div>
+  </div><div class="kv">
+    <div>Server IP</div><div>${esc(h.ip||'—')}</div>
+    <div>Hosting</div><div>${esc([h.org, h.asn].filter(Boolean).join(' · ')||h.network||'—')}</div>
+    <div>Location</div><div>${esc([h.city, h.region, h.country].filter(Boolean).join(', ')||'—')}</div>
+    <div>Abuse contact</div><div>${esc(h.abuse_email||w.registrar_abuse||'—')}</div>
+    <div>Email (MX)</div><div>${dns.MX==null?'unknown':dns.MX.length?esc(dns.MX.join(', ')):'none'}</div>
+  </div></div>
+  <h3 style="margin-top:12px">What other security services say</h3><table>${(I.reputation||[]).map(r=>`<tr><td>${esc(r.source)}</td>
+    <td><span class="badge ${r.status==='listed'?'BLOCKED':r.status==='mixed'?'CAUTION':r.status==='clean'?'CLEAN':'UNREACHABLE'}">${esc(r.status)}</span></td>
+    <td class="muted">${esc(r.detail||r.error||'')}</td><td>${r.link?`<a href="${esc(r.link)}" target="_blank" rel="noopener">open ↗</a>`:''}</td></tr>`).join('')}
+    <tr><td>Check manually</td><td colspan="3">${(I.check_manually||[]).map(m=>`<a href="${esc(m.link)}" target="_blank" rel="noopener">${esc(m.name)} ↗</a>`).join(' · ')}</td></tr></table></div>`;
+}
+function card(r){
+  const ex = r.extraction || {}, n = r.notification, ch = (r.domain_score||{}).chars;
+  const fl = r.flags || [];
+  return `<div class="card"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+    <span class="badge ${r.verdict}">${r.verdict}</span><b style="font-size:18px">${esc(ch?ch.unicode:r.host)}</b>
+    <span class="mono">${esc(r.tier_reason||'')} · ${r.llm_used?'AI analysis':'heuristic analysis'} · ${r.elapsed_ms??'-'} ms</span></div>
+    ${meter(r.verdict)}<div class="mono" style="margin-bottom:14px">${esc(TIER_TXT[r.verdict]||'')}</div>
+    <div class="grid"><div>${r.screenshot?`<img src="${r.screenshot}" alt="screenshot">`:`<div class="muted">${esc(r.crawl_error||'no screenshot')}</div>`}</div>
+    <div><h3>Red flags (${r.flag_count ?? fl.length})</h3>
+      ${fl.length ? fl.map(f=>`<div class="flag ${f.critical?'crit':''}"><span class="id">${f.id}</span><b>${esc(f.title)}</b>${f.critical?' <span class="badge BLOCKED">critical</span>':''}
+        <div class="ev">${esc(f.evidence)}</div><div class="muted" style="font-size:12px;margin-top:2px">${esc(f.why)}</div></div>`).join('') : '<div class="muted">No red flags.</div>'}
+      <div class="kv" style="margin-top:14px">
+        <div>Claims to be</div><div>${esc(r.brand || ex.claimed_brand || '—')}</div>
+        <div>Category (${r.llm_used?'AI':'heuristic'})</div><div>${esc((ex.scam_category||'—').replaceAll('_',' '))}</div>
+        ${ch?`<div>Characters</div><div>reads as <code>${esc(ch.skeleton)}</code> ${ch.foreign.map(f=>`<span class="badge BLOCKED" style="margin:2px">${esc(f.char)} ${esc(f.codepoint)} ${esc(f.script)}${f.looks_like?' ≠ '+esc(f.looks_like):''}</span>`).join('')}</div>`:''}
+      </div>
+      ${n?`<div class="note"><div dir="rtl">${esc(n.ar)}</div><div style="margin-top:6px">${esc(n.en)}</div></div>`:''}
+    </div></div></div>` + intelPanel(r.intel);
+}
+async function scan(url){
+  $('#b').disabled = true; $('#out').innerHTML = '<div class="card mono">Opening the page in a sandbox, checking who registered it, where it is hosted and what other services say…</div>';
+  try{ const r = await fetch('/api/scan', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({url})});
+    const j = await r.json(); $('#out').innerHTML = r.ok ? card(j) : `<div class="card">Error: ${esc(j.detail)}</div>`;
+  }catch(e){ $('#out').innerHTML = `<div class="card">Error: ${esc(e)}</div>`; }
+  $('#b').disabled = false; refresh();
+}
+async function refresh(){
+  const rows = await (await fetch('/api/scans?limit=25')).json();
+  $('#rows').innerHTML = rows.map(r => `<tr data-id="${r.id}"><td><span class="badge ${r.verdict}">${r.verdict}</span></td>
+    <td>${esc(((r.domain_score||{}).chars||{}).unicode || r.host)}</td><td>${r.flag_count ?? '-'}</td><td class="muted">${esc(r.source)}</td>
+    <td class="muted">${r.scanned_at ? new Date(r.scanned_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</td></tr>`).join('');
+  document.querySelectorAll('#rows tr').forEach(tr => tr.onclick = async () => {
+    $('#out').innerHTML = card(await (await fetch('/api/scans/' + tr.dataset.id)).json()); window.scrollTo(0,0); });
+  const ev = await (await fetch('/api/events?limit=12')).json();
+  $('#events').innerHTML = ev.map(e => `<tr><td><span class="badge ${({BLOCK:'BLOCKED',HOLD:'CAUTION',WARN:'WARN',SCAN:'UNREACHABLE',ALLOW:'CLEAN'})[e.action]||''}">${esc(e.action)}</span></td>
+    <td>${esc(e.host)}</td><td class="muted">${esc(e.device)}</td><td class="muted" style="font-size:12px">${esc(e.reason).slice(0,90)}</td></tr>`).join('') || '<tr><td class="muted">No network activity yet.</td></tr>';
+  const rv = await (await fetch('/api/reviews')).json();
+  $('#reviews').innerHTML = rv.map(v => `<tr><td>${esc(v.reg)}</td><td class="muted">${esc(v.device)}</td><td>${v.status==='open'
+    ? `<button onclick="decide(${v.id},'release')">Release</button> <button onclick="decide(${v.id},'keep')">Keep blocked</button>` : esc(v.status)}</td></tr>`).join('') || '<tr><td class="muted">No open requests.</td></tr>';
+}
+async function decide(id, d){ await fetch(`/api/reviews/${id}?decision=${d}`, {method:'POST'}); refresh(); }
+$('#f').onsubmit = e => { e.preventDefault(); if ($('#u').value.trim()) scan($('#u').value.trim()); };
+$('#demo').onclick = e => { e.preventDefault(); const u = location.origin + '/demo/fine'; $('#u').value = u; scan(u); };
+refresh(); setInterval(refresh, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+data/
+.env
+hunter_candidates.csv
+__pycache__/
+.venv/
