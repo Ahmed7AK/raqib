@@ -40,6 +40,12 @@ Open `http://<laptop-ip>/` to reach the dashboard and the "Analyse a link" box.
    - `uae-fines-portal.com`: has an innocent-looking name, so it loads. The engine scans it in the background (about 2 s with heuristics, longer with the LLM), a Telegram alert says "don't enter your details", and the next lookup (after the 30 s TTL) is blocked.
 4. Send `http://adpolice-fines-pay.com/` and `http://uae-fines-portal.com/` to the phone through WhatsApp, SMS and Gmail, then tap each one.
 
+## Raqib on WhatsApp (simulation)
+For people who will never change their phone's DNS, for example elderly relatives: forward a suspicious message to Raqib on WhatsApp and get the same verdict, in Arabic and English, with one-tap "Why?" and "Report" buttons.
+- Open `http://localhost:8000/whatsapp`, choose a preset message and forward it. The simulated phone sends the exact WhatsApp Business Cloud API webhook payload to `POST /api/whatsapp/webhook`; the engine scans the link for real and replies.
+- `whatsapp.py` parses webhooks and formats replies from the engine's own alert text. Set `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` and `WHATSAPP_VERIFY_TOKEN` to send real replies through Meta's Graph API. **Not tested against a real number.** Before going live, verify `X-Hub-Signature-256` and rate-limit per sender.
+- Run the engine with `HOST_MAP` set so the demo domains in the presets resolve to the engine itself.
+
 ## API (for the dashboard and integrations)
 | Method | Path | Purpose |
 |---|---|---|

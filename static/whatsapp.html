@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raqib on WhatsApp · Simulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/raqib.css">
+<style>
+  .stage{display:grid;grid-template-columns:1fr 400px;gap:72px;align-items:start;padding:56px 0 0}
+  .copy h1{font:400 clamp(44px,5.6vw,68px)/1 var(--serif);letter-spacing:-.025em;margin:16px 0 18px}
+  .copy h1 em{font-style:italic}
+  .copy .lede{font-size:17px;color:var(--ink-2);margin:0 0 34px;max-width:520px}
+  .presets{display:grid;gap:10px;margin-top:12px}
+  .preset{appearance:none;text-align:left;border:0;background:var(--surface);border-radius:14px;padding:14px 16px;cursor:pointer;
+    box-shadow:0 0 0 1px var(--line);display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:center;transition:box-shadow .2s,transform .2s var(--ease)}
+  .preset:hover{box-shadow:0 0 0 1px var(--ink-3);transform:translateY(-1px)}
+  .preset:disabled{opacity:.5;cursor:default;transform:none}
+  .preset .tag{font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+  .preset .ptext{grid-column:1;font-size:14px;color:var(--ink);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .preset .send{grid-row:1/3;grid-column:2;font:500 13px var(--sans);color:var(--ink-2)}
+  .copy details.section{border:0;margin-top:18px;background:var(--surface);border-radius:14px;box-shadow:0 0 0 1px var(--line)}
+  .copy details.section>summary{padding:16px 18px}
+  .copy details.section>.inner{padding:0 18px 18px;font-size:14px;color:var(--ink-2)}
+  .copy code{font:12.5px var(--mono);background:var(--paper);padding:1px 5px;border-radius:5px;color:var(--ink)}
+  pre.json{font:11.5px/1.5 var(--mono);background:var(--ink);color:#E8ECEF;border-radius:10px;padding:14px;max-height:260px;overflow:auto;margin:8px 0 0;white-space:pre-wrap;word-break:break-all}
+  .row{display:flex;gap:10px;align-items:center;margin-top:18px}
+
+  /* Phone */
+  .phone{position:sticky;top:88px;width:400px;height:min(800px,calc(100vh - 110px));min-height:560px;background:#0E1217;border-radius:54px;padding:11px;
+    box-shadow:0 0 0 1px #2a2f36,0 40px 80px -30px rgba(14,18,23,.55)}
+  .screen{height:100%;border-radius:44px;overflow:hidden;display:flex;flex-direction:column;background:#EFEAE2;position:relative;
+    font-family:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",var(--ar),sans-serif}
+  .sim-label{position:absolute;left:50%;transform:translateX(-50%);bottom:-34px;font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+  .sb{height:40px;background:#008069;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:6px 28px 0;font:600 14px -apple-system,Roboto,sans-serif}
+  .sb .icons{display:flex;gap:5px;align-items:center}
+  .wa-head{background:#008069;color:#fff;display:flex;align-items:center;gap:10px;padding:6px 12px 10px 8px}
+  .wa-head .back{width:22px;height:22px}
+  .avatar{width:38px;height:38px;border-radius:50%;background:#212227;display:grid;place-items:center;flex:none}
+  .who{flex:1;min-width:0}
+  .who b{display:block;font-size:16.5px;font-weight:600;line-height:1.2}
+  .who span{font-size:12.5px;opacity:.85}
+  .wa-head .act{display:flex;gap:18px;opacity:.95}
+  .chat{flex:1;overflow-y:auto;padding:10px 12px 14px;display:flex;flex-direction:column;gap:2px;scroll-behavior:smooth;
+    background-color:#EFEAE2;background-image:radial-gradient(rgba(0,0,0,.035) 1.2px,transparent 1.3px),radial-gradient(rgba(0,0,0,.025) 1px,transparent 1.1px);
+    background-size:22px 22px,15px 15px;background-position:0 0,7px 11px}
+  .chip-day{align-self:center;background:#fff;color:#54656F;font-size:12px;padding:5px 12px;border-radius:8px;margin:6px 0 8px;box-shadow:0 1px .5px rgba(11,20,26,.13);text-transform:uppercase;letter-spacing:.02em}
+  .chip-sys{align-self:center;background:#FFEECD;color:#54656F;font-size:12px;line-height:1.45;padding:7px 12px;border-radius:8px;margin:0 14px 10px;text-align:center;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .msg{max-width:84%;padding:6px 8px 8px 9px;border-radius:8px;font-size:14.2px;line-height:1.38;color:#111B21;position:relative;box-shadow:0 1px .5px rgba(11,20,26,.13);
+    margin-top:8px;animation:pop .22s var(--ease);word-wrap:break-word}
+  @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+  .msg.in{align-self:flex-start;background:#fff;border-top-left-radius:0}
+  .msg.out{align-self:flex-end;background:#D9FDD3;border-top-right-radius:0}
+  .msg.in::before,.msg.out::before{content:"";position:absolute;top:0;width:8px;height:13px}
+  .msg.in::before{left:-8px;background:linear-gradient(to top right,transparent 50%,#fff 50%)}
+  .msg.out::before{right:-8px;background:linear-gradient(to top left,transparent 50%,#D9FDD3 50%)}
+  .msg .fwd{display:flex;align-items:center;gap:4px;font-size:12.5px;font-style:italic;color:#667781;margin-bottom:2px}
+  .msg .t div{min-height:1.38em}
+  .msg .t code{font:13px ui-monospace,Menlo,monospace}
+  .msg .t .lnk{color:#027EB5;text-decoration:underline}
+  .msg .meta{float:right;display:flex;align-items:center;gap:3px;font-size:11px;color:#667781;margin:6px 0 -4px 10px;position:relative;top:4px}
+  .ticks{width:16px;height:11px} .ticks path{fill:#8696A0} .ticks.read path{fill:#53BDEB}
+  .btns{align-self:flex-start;width:84%;display:grid;gap:2px;margin-top:2px}
+  .btns button{appearance:none;border:0;background:#fff;border-radius:8px;padding:10px;font:500 14px -apple-system,Roboto,var(--ar),sans-serif;color:#00A884;cursor:pointer;
+    box-shadow:0 1px .5px rgba(11,20,26,.13);display:flex;align-items:center;justify-content:center;gap:6px}
+  .btns button:disabled{color:#8696A0;cursor:default}
+  .typing{align-self:flex-start;background:#fff;border-radius:8px;border-top-left-radius:0;padding:11px 14px;margin-top:8px;display:flex;gap:4px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .typing i{width:7px;height:7px;border-radius:50%;background:#8696A0;animation:blink 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,60%,100%{opacity:.3;transform:none}30%{opacity:1;transform:translateY(-2px)}}
+  .composer{display:flex;align-items:center;gap:6px;padding:6px 8px 14px;background:transparent}
+  .composer .field{flex:1;display:flex;align-items:center;gap:10px;background:#fff;border-radius:24px;padding:11px 14px;color:#8696A0;font-size:15px;box-shadow:0 1px .5px rgba(11,20,26,.13)}
+  .composer .field span{flex:1}
+  .mic{width:46px;height:46px;border-radius:50%;background:#00A884;display:grid;place-items:center;flex:none}
+  @media(max-width:980px){.stage{grid-template-columns:1fr}.phone{position:relative;top:0;margin:0 auto}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="/" aria-label="Raqib home">
+    <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#212227"/>
+      <path d="M6 16c2.8-4.6 6.3-7 10-7s7.2 2.4 10 7c-2.8 4.6-6.3 7-10 7s-7.2-2.4-10-7z" fill="none" stroke="#BDD4E7" stroke-width="2"/>
+      <circle cx="16" cy="16" r="3.2" fill="#BDD4E7"/></svg>
+    <span class="wordmark">Raqib</span><span class="ar">رقيب</span></a>
+  <nav><a href="/">Check a link</a><a href="/whatsapp" class="on">WhatsApp</a><a href="/#activity">Activity</a></nav>
+  <div class="status" id="status"><i></i><span id="mode">Connecting</span></div>
+</div></header>
+
+<main class="wrap">
+  <div class="stage">
+    <section class="copy">
+      <div class="eyebrow">Raqib on WhatsApp · Simulation</div>
+      <h1>Forward it to <em>Raqib.</em></h1>
+      <p class="lede">Most people will never change their phone's DNS settings. So anyone can forward a suspicious message to Raqib on WhatsApp and get the same verdict from the same engine, in Arabic and English.</p>
+      <div class="eyebrow">Choose a message to forward</div>
+      <div class="presets" id="presets"></div>
+      <details class="section"><summary>How this simulation works</summary><div class="inner">
+        <p style="margin-top:0">The phone sends the same webhook payload that the WhatsApp Business Cloud API sends, to <code>POST /api/whatsapp/webhook</code>. The engine scans the link for real, with the same rules as the network Guard, and answers with reply buttons.</p>
+        <p style="margin-bottom:0">Only WhatsApp's delivery is simulated. Setting <code>WHATSAPP_TOKEN</code> and <code>WHATSAPP_PHONE_ID</code> sends real replies through Meta's Graph API; that path has not been tested yet.</p>
+      </div></details>
+      <details class="section" id="wh"><summary>Last webhook call <span class="hint" id="wh-hint">none yet</span></summary><div class="inner">
+        <div class="eyebrow">Request (WhatsApp → Raqib)</div><pre class="json" id="wh-req">—</pre>
+        <div class="eyebrow" style="margin-top:14px">Response</div><pre class="json" id="wh-res">—</pre>
+      </div></details>
+      <div class="row"><button class="btn ghost" id="clear" type="button">Clear chat</button></div>
+    </section>
+
+    <div class="phone" aria-label="Simulated WhatsApp chat with Raqib">
+      <div class="screen">
+        <div class="sb"><span id="clock">9:41</span><span class="icons">
+          <svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx=".6" fill="#fff"/><rect x="4.6" y="5" width="3" height="6" rx=".6" fill="#fff"/><rect x="9.2" y="2.5" width="3" height="8.5" rx=".6" fill="#fff"/><rect x="13.8" y="0" width="3" height="11" rx=".6" fill="#fff"/></svg>
+          <svg width="24" height="11" viewBox="0 0 24 11"><rect x=".5" y=".5" width="20" height="10" rx="3" fill="none" stroke="#fff" opacity=".7"/><rect x="2" y="2" width="15" height="7" rx="1.6" fill="#fff"/><rect x="21.6" y="3.5" width="1.6" height="4" rx=".8" fill="#fff" opacity=".7"/></svg></span></div>
+        <div class="wa-head">
+          <svg class="back" viewBox="0 0 24 24"><path d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z" fill="#fff"/></svg>
+          <div class="avatar"><svg width="22" height="22" viewBox="0 0 32 32"><path d="M5 16c3-5 6.7-7.6 11-7.6S24 11 27 16c-3 5-6.7 7.6-11 7.6S8 21 5 16z" fill="none" stroke="#BDD4E7" stroke-width="2.2"/><circle cx="16" cy="16" r="3.6" fill="#BDD4E7"/></svg></div>
+          <div class="who"><b>Raqib رقيب</b><span id="presence">online</span></div>
+          <div class="act">
+            <svg width="22" height="22" viewBox="0 0 24 24"><path d="M17 10.5V7a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3.5l4 4v-11l-4 4z" fill="#fff"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z" fill="#fff"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2" fill="#fff"/><circle cx="12" cy="12" r="2" fill="#fff"/><circle cx="12" cy="19" r="2" fill="#fff"/></svg>
+          </div>
+        </div>
+        <div class="chat" id="chat"></div>
+        <div class="composer">
+          <div class="field"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#8696A0" stroke-width="1.6"/><circle cx="9" cy="10" r="1.2" fill="#8696A0"/><circle cx="15" cy="10" r="1.2" fill="#8696A0"/><path d="M8 14.5c1 1.4 2.4 2 4 2s3-.6 4-2" fill="none" stroke="#8696A0" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <span>Message</span>
+            <svg width="20" height="20" viewBox="0 0 24 24"><path d="M16.5 6.5 8 15a2 2 0 0 0 2.8 2.8l8.6-8.6a3.5 3.5 0 0 0-5-5L5.6 13a5 5 0 0 0 7.1 7.1l7.1-7.1" fill="none" stroke="#8696A0" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <div class="mic"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.9V21h2v-2.1a7 7 0 0 0 6-6.9h-2z" fill="#fff"/></svg></div>
+        </div>
+      </div>
+      <div class="sim-label">Simulated phone · live Raqib engine</div>
+    </div>
+  </div>
+</main>
+
+<footer class="foot"><div class="wrap">
+  <p class="motto">AI reads · code decides · the network enforces.</p>
+  <p class="small">A simulation of a WhatsApp chat. Not affiliated with WhatsApp or Meta. Demo domains exist only inside Raqib. <a href="https://github.com/Ahmed7AK/raqib" target="_blank" rel="noopener">Source on GitHub</a></p>
+</div></footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const now = () => new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+const PRESETS = [
+  {tag:'SMS · Police fine', text:'Abu Dhabi Police: You have an unpaid traffic fine of AED 150. Pay within 24 hours to avoid vehicle suspension: http://adpolice-fines-pay.com'},
+  {tag:'Group chat · iPhone deal', text:'🔥 UAE clearance! iPhone 16 Pro at 80% OFF, today only. Order here 👉 http://iphone-mega-sale.com'},
+  {tag:'Friend · Events guide', text:'Dubai Winter Events Guide, listings close within 24 hours: dubai-events-guide.com'},
+  {tag:'Colleague · Real site', text:'Can you check this before I sign in? https://google.com'},
+  {tag:'No link', text:'Hi, how does this work?', forwarded:false}];
+let busy = false;
+
+const TICKS = '<svg class="ticks" viewBox="0 0 16 11"><path d="M11.07.65 10.4.12a.4.4 0 0 0-.55.07L4.1 7.6 1.73 5.38a.4.4 0 0 0-.56 0l-.55.56a.4.4 0 0 0 0 .57l3.14 2.97a.4.4 0 0 0 .57-.04l6.8-8.24a.4.4 0 0 0-.06-.55z"/><path class="t2" d="M15.07.65 14.4.12a.4.4 0 0 0-.55.07L8.1 7.6l-.82-.77-.95 1.15 1.53 1.45a.4.4 0 0 0 .57-.04l6.8-8.24a.4.4 0 0 0-.06-.55z"/></svg>';
+const FWD = '<svg width="14" height="12" viewBox="0 0 16 13"><path d="M9.5 3.4V0L16 6l-6.5 6V8.5C4.6 8.5 1.6 10.2 0 13c.6-4.5 3.4-8.9 9.5-9.6z" fill="#8696A0"/></svg>';
+
+function wamd(text){  // WhatsApp formatting: *bold* _italic_ ~strike~ ```mono```, links
+  return String(text).split('\n').map(line => {
+    let h = esc(line);
+    h = h.replace(/```([^`]+)```/g, '<code>$1</code>')
+         .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s.,!?:)]|$)/g, '$1<b>$2</b>')
+         .replace(/(^|\s)_([^_\n]+)_(?=[\s.,!?:)]|$)/g, '$1<i>$2</i>')
+         .replace(/(^|\s)~([^~\n]+)~(?=\s|$)/g, '$1<s>$2</s>')
+         .replace(/(^|\s)((?:https?:\/\/|(?=[a-z0-9-]+\.[a-z]{2,}\b))[^\s<]+)/gi, (m, a, u) => /\./.test(u) ? `${a}<span class="lnk">${u}</span>` : m);
+    return `<div dir="auto">${h || '&nbsp;'}</div>`;
+  }).join('');
+}
+function scrollDown(){ const c = $('#chat'); c.scrollTop = c.scrollHeight; }
+function bubble(cls, inner){ const d = document.createElement('div'); d.className = 'msg ' + cls; d.innerHTML = inner; $('#chat').appendChild(d); scrollDown(); return d; }
+function addOut(text, forwarded){
+  return bubble('out', `${forwarded ? `<div class="fwd">${FWD} Forwarded</div>` : ''}<span class="meta">${now()} ${TICKS}</span><div class="t">${wamd(text)}</div>`);
+}
+function ticks(el, state){ const s = el.querySelector('.ticks'); s.querySelector('.t2').style.display = state === 'sent' ? 'none' : ''; s.classList.toggle('read', state === 'read'); }
+function addIn(r){
+  bubble('in', `<span class="meta">${now()}</span><div class="t">${wamd(r.text)}</div>`);
+  if (r.buttons && r.buttons.length){
+    const b = document.createElement('div'); b.className = 'btns';
+    b.innerHTML = r.buttons.map(x => `<button type="button" data-id="${esc(x.id)}" data-title="${esc(x.title)}"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" fill="currentColor"/></svg>${esc(x.title)}</button>`).join('');
+    b.querySelectorAll('button').forEach(btn => btn.onclick = () => tap(btn));
+    $('#chat').appendChild(b); scrollDown();
+  }
+}
+let typingEl = null;
+function typing(on){
+  $('#presence').textContent = on ? 'typing…' : 'online';
+  if (on){ typingEl = document.createElement('div'); typingEl.className = 'typing'; typingEl.innerHTML = '<i></i><i></i><i></i>'; $('#chat').appendChild(typingEl); scrollDown(); }
+  else if (typingEl){ typingEl.remove(); typingEl = null; }
+}
+function payload(message){
+  const ts = Math.floor(Date.now() / 1000);
+  return {object:'whatsapp_business_account', entry:[{id:'SIMULATED_WABA_ID', changes:[{field:'messages', value:{
+    messaging_product:'whatsapp', metadata:{display_phone_number:'971800000000', phone_number_id:'SIMULATED'},
+    contacts:[{profile:{name:'Demo user'}, wa_id:'971500000000'}],
+    messages:[{from:'971500000000', id:'wamid.SIM' + Date.now(), timestamp:String(ts), ...message}]}}]}]};
+}
+async function converse(el, message){
+  busy = true; document.querySelectorAll('.preset').forEach(p => p.disabled = true);
+  ticks(el, 'sent'); await sleep(350); ticks(el, 'delivered'); await sleep(500); ticks(el, 'read'); await sleep(250);
+  typing(true);
+  const t0 = Date.now(), body = payload(message);
+  $('#wh-req').textContent = JSON.stringify(body, null, 2);
+  let res;
+  try{ const r = await fetch('/api/whatsapp/webhook', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    res = await r.json(); if (!r.ok) res = {replies:[{type:'text', text:'⚪ ' + (res.detail || 'Raqib could not answer.')}]}; }
+  catch(e){ res = {replies:[{type:'text', text:'⚪ Raqib engine is offline.'}]}; }
+  $('#wh-res').textContent = JSON.stringify(res, null, 2);
+  $('#wh-hint').textContent = `${message.type} · ${((Date.now() - t0) / 1000).toFixed(1)} s`;
+  await sleep(Math.max(0, 900 - (Date.now() - t0)));
+  typing(false);
+  for (const r of res.replies || []){ addIn(r); await sleep(450); }
+  busy = false; document.querySelectorAll('.preset').forEach(p => p.disabled = false);
+}
+function send(p){ if (busy) return; converse(addOut(p.text, p.forwarded !== false), {type:'text', text:{body:p.text}}); }
+function tap(btn){
+  if (busy) return; btn.parentElement.querySelectorAll('button').forEach(b => b.disabled = true);
+  converse(addOut(btn.dataset.title, false), {type:'interactive', interactive:{type:'button_reply', button_reply:{id:btn.dataset.id, title:btn.dataset.title}}});
+}
+function reset(){
+  $('#chat').innerHTML = `<div class="chip-day">Today</div><div class="chip-sys">🔒 Simulated chat. Replies come from the live Raqib engine; only WhatsApp delivery is simulated.</div>`;
+  addIn({text:'مرحباً، أنا رقيب 👋\nأرسل لي أي رابط أو رسالة مشبوهة وسأفحصها لك خلال ثوانٍ.\n\nHi, I\'m *Raqib* 👋\nForward me any link or message you\'re unsure about and I\'ll check it in seconds.'});
+}
+PRESETS.forEach(p => { const b = document.createElement('button'); b.type = 'button'; b.className = 'preset';
+  b.innerHTML = `<span class="tag">${esc(p.tag)}</span><span class="ptext">${esc(p.text)}</span><span class="send">Forward →</span>`;
+  b.onclick = () => send(p); $('#presets').appendChild(b); });
+$('#clear').onclick = () => { if (!busy) reset(); };
+setInterval(() => $('#clock').textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}).replace(/\s?[AP]M/i, ''), 10000);
+$('#clock').textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}).replace(/\s?[AP]M/i, '');
+(async () => { try{ const c = await (await fetch('/api/config')).json(); $('#status').classList.add('ok');
+  $('#mode').textContent = c.whatsapp === 'live' ? 'WhatsApp live' : 'WhatsApp simulated'; } catch(e){ $('#mode').textContent = 'Engine offline'; } })();
+reset();
+</script>
+</body>
+</html>

@@ -1013,3 +1013,75 @@ async def index(request: Request):
         page = "deal" if "deal" in h or "sale" in h else "events" if "event" in h or "guide" in h else "fine"
         return FileResponse(BASE / "demo" / f"{page}.html")
     return FileResponse(BASE / "static" / "index.html")
+
+
+# ---------------------------------------------------------------- WhatsApp (simulated unless WHATSAPP_TOKEN is set)
+import whatsapp as wa  # noqa: E402
+
+app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
+
+
+@app.get("/api/config")
+async def api_config():
+    return {"demo_domains": sorted(HOST_MAP), "llm": bool(LLM_API_KEY) and not LLM_MOCK,
+            "whatsapp": "live" if wa.live() else "simulation"}
+
+
+@app.get("/whatsapp", response_class=HTMLResponse)
+async def whatsapp_page():
+    return FileResponse(BASE / "static" / "whatsapp.html")
+
+
+@app.get("/api/whatsapp/webhook")
+async def wa_verify(request: Request):
+    """Meta's webhook verification handshake."""
+    from fastapi.responses import PlainTextResponse
+    q = request.query_params
+    if wa.WA_VERIFY and q.get("hub.mode") == "subscribe" and q.get("hub.verify_token") == wa.WA_VERIFY:
+        return PlainTextResponse(q.get("hub.challenge", ""))
+    raise HTTPException(403)
+
+
+async def wa_handle(app, kind: str, value: str, port: int) -> list:
+    if kind == "button":
+        action, _, sid = value.partition(":")
+        try:
+            rec = await api_scan_get(sid)
+        except HTTPException:
+            return [wa.text_reply(wa.HELP)]
+        return [wa.why_reply(rec, flagsys.FLAGS_AR) if action == "why" else wa.text_reply(wa.REPORT)]
+    url = wa.extract_url(value)
+    if not url:
+        return [wa.text_reply(wa.HELP)]
+    p = urlparse(url if re.match(r"^https?://", url, re.I) else "https://" + url)
+    host = (p.hostname or "").lower()
+    if host in HOST_MAP:  # demo domains exist only inside Raqib and are served by this engine
+        url = f"http://{host}:{p.port or port}{p.path or '/'}"
+    try:
+        rec = await run_scan(app, url, source="whatsapp")
+    except HTTPException as e:
+        return [wa.text_reply(f"⚪ لم أتمكن من فحص هذا الرابط.\nI couldn't check that link: {e.detail}")]
+    return [wa.verdict_reply(rec)]
+
+
+@app.post("/api/whatsapp/webhook")
+async def wa_webhook(request: Request):
+    """WhatsApp Cloud API webhook. TODO before going live: verify X-Hub-Signature-256 and rate-limit per sender."""
+    payload = await request.json()
+    port = request.url.port or 80
+    msgs = list(wa.parse(payload))
+    if wa.live():  # Meta wants a fast 200, so reply in the background
+        async def work():
+            for sender, kind, value in msgs:
+                for r in await wa_handle(request.app, kind, value, port):
+                    await wa.send(sender, r)
+        t = asyncio.create_task(work())
+        request.app.state.tasks.add(t)
+        t.add_done_callback(request.app.state.tasks.discard)
+        return {"status": "accepted"}
+    if not request.client or request.client.host not in ("127.0.0.1", "::1"):
+        rate_limit(request)
+    replies = []
+    for sender, kind, value in msgs:
+        replies += [{"to": sender, **r} for r in await wa_handle(request.app, kind, value, port)]
+    return {"mode": "simulation", "replies": replies}
